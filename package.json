@@ -1,0 +1,51 @@
+{
+  "name": "sudoku",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "description": "A modern Sudoku web app on Next.js 15 + TypeScript.",
+  "author": {
+    "name": "Sam",
+    "email": "allihysa@gmail.com"
+  },
+  "repository": "github:allihysa-alt/Sudoku",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:css": "stylelint \"app/**/*.css\" \"src/**/*.css\"",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.1.0",
+    "@playwright/test": "^1.45.0",
+    "@testing-library/jest-dom": "^6.4.0",
+    "@testing-library/react": "^16.0.0",
+    "@types/node": "^20.12.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.0.0",
+    "jsdom": "^25.0.0",
+    "prettier": "^3.3.0",
+    "stylelint": "^16.10.0",
+    "stylelint-declaration-strict-value": "^1.10.7",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.0"
+  },
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20"
+  }
+}

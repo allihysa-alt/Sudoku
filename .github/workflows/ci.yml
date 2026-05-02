@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm lint:css
+      - run: pnpm test
+      - run: pnpm build
+
+      # Phase 11 promotes the e2e suite into CI. The job below is the
+      # template; uncomment + commit alongside the Playwright specs.
+      #
+      # - run: pnpm playwright install --with-deps chromium
+      # - run: pnpm test:e2e

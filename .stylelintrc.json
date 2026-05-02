@@ -1,0 +1,13 @@
+{
+  "plugins": ["stylelint-declaration-strict-value"],
+  "rules": {
+    "scale-unlimited/declaration-strict-value": [
+      ["color", "/-color$/", "fill", "stroke"],
+      {
+        "ignoreValues": ["currentColor", "inherit", "transparent", "none"],
+        "disableFix": true
+      }
+    ]
+  },
+  "ignoreFiles": ["app/globals.css", "node_modules/**", ".next/**"]
+}
