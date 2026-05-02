@@ -1,11 +1,27 @@
 /*
  * globals.css
  * --------------------------------------------------------------------
- * Phase 1: minimal reset + scaffold styles for the placeholder home
- * page. The full token surface (three :root[data-theme] blocks for
- * Classic / Modern / Editorial) lands in Phase 2. Until then this
- * file is the only place raw colour values may appear (stylelint's
- * scale-unlimited/declaration-strict-value rule ignores it).
+ * Phase 2 — full token surface. Three :root blocks (Classic baseline,
+ * Modern overrides, Editorial overrides) ported verbatim from the CRA
+ * spec at C:\Users\ismoo\Desktop\sudoku-web-app-master\src\index.css
+ * (rev. 2026-05-01, post-Round-12). Token NAMES are identical across
+ * all three themes — components resolve to var(--token) and never
+ * branch on theme in JS or CSS.
+ *
+ * The only deliberate edits to the CRA blocks:
+ *   1. --app-font-family resolves to next/font CSS variables
+ *      (var(--font-manrope), var(--font-inter)) instead of bare
+ *      Google Font names — this app self-hosts via next/font/google
+ *      rather than runtime-linking to fonts.googleapis.com.
+ *   2. The CRA's html / body / #root rules are not ported here;
+ *      Phase 2 ships a static placeholder page that does not require
+ *      the play-surface viewport-locking. Phase 5 (grid component)
+ *      tightens body to overflow:hidden / touch-action:none / 100%
+ *      width+height to match the spec.
+ *
+ * stylelint-declaration-strict-value ignores this file (it's the
+ * single source-of-truth for raw colour values). Component CSS
+ * Modules must resolve to var(--…) only.
  * --------------------------------------------------------------------
  */
 
@@ -15,18 +31,667 @@
     box-sizing: border-box;
 }
 
-html,
+:root {
+    /* iOS-inspired modern light theme. White surfaces on iOS gray6
+       page background, system blue accent throughout, cool grays for
+       chrome, iOS standard system colors for status (red/green/orange).
+       Round-10 (2026-05-01): font unified to Manrope across all three
+       themes. Themes are differentiated by colour and structure tokens
+       only — typographic voice (italic, small-caps, serif body) was
+       retired so the same face renders Classic / Modern / Editorial.
+       Inter stays in the fallback chain as a fast-path (it still ships
+       on most systems and paints before Manrope hydrates). */
+    --app-font-family: var(--font-manrope), var(--font-inter), system-ui, -apple-system,
+                       BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    /* Look-and-feel: page background nudged to the slightly cooler
+       neutral the mockup uses so the white surfaces (status
+       bar, modals) read with a touch more separation. Achromatic
+       only — no hue introduced.
+       Round-10 (2026-05-01): --grid-bg-color now matches
+       --background-color so the play grid no longer reads as a stark
+       white card floating on the page (Editorial's seamless paper
+       feel applied to Classic). The grid's bold 3×3 separators and
+       outer hairline carry the visual definition on their own. */
+    --background-color: #F2F4F8;
+    --grid-bg-color: #F2F4F8;
+    --text-color: #000000;
+
+    /* QA-3 (#25): chrome links pick up the new --accent indigo. */
+    --link-text-color: #2563EB;
+    --link-bg-color: transparent;
+    --link-hover-text-color: #1D4ED8;
+    --link-hover-bg-color: #2563EB1A;
+
+    --status-bar-text-color: #8E8E93;
+    --status-bar-bg: #FFFFFF;
+    --status-bar-border-color: #E6E9EE;
+    --status-bar-button-hover-color: #F2F4F8;
+
+    --menu-border-color: #E5E5EA;
+    --menu-text-color: #000000;
+    --menu-bg-color: #FFFFFF;
+    --menu-box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --menu-hover-text-color: #2563EB;
+    --menu-hover-bg-color: #F2F2F7;
+    --menu-disabled-text-color: #C7C7CC;
+
+    --modal-text-color: #000000;
+    --modal-bg-color: #FFFFFF;
+    --modal-box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+    --modal-backdrop-color: #00000066;
+    --modal-heading-underline-color: #E5E5EA;
+    --modal-button-text-color: #2563EB;
+    --modal-button-bg-color: #F2F2F7;
+    --modal-button-primary-text-color: #FFFFFF;
+    --modal-button-primary-bg-color: #2563EB;
+    --modal-button-danger-text-color: #FFFFFF;
+    --modal-button-danger-bg-color: #FF3B30;
+    --modal-icon-ok-fill-color: #34C759;
+    --modal-icon-warning-fill-color: #FF9500;
+    --modal-icon-error-fill-color: #FF3B30;
+
+    --button-hover-shadow: 0 2px 10px rgba(0, 0, 0, 0.10);
+
+    --input-toggle-bg-color: #E9E9EB;
+    --input-toggle-inset-color: transparent;
+    --input-toggle-off-color: #FFFFFF;
+    --input-toggle-on-color: #34C759;
+    --input-multi-text-color: #8E8E93;
+    --input-multi-bg-color: transparent;
+    --input-multi-selected-text-color: #FFFFFF;
+    --input-multi-selected-bg-color: #2563EB;
+
+    --badge-text-color: #FFFFFF;
+    --badge-bg-color: #FF3B30;
+    --solved-text-color: #34C759;
+
+    /* Round-12 (2026-05-01) — owner directive: grid borders are the
+       same dark-gray pair across all three themes. */
+    --grid-line-color: #888888;
+    --grid-line-color-bold: #2D2D2D;
+    --mini-grid-line-color: #C7C7CC;
+    --mini-grid-bar-color: #FFCC00;
+    --mini-grid-bar-text-color: #000000;
+
+    --given-digit-color: #000000;
+    --visited-digit-color: #C7C7CC;
+    --paused-digit-color: #00000022;
+    --digit-color: #007AFF;
+    /* Round-6 (2026-04-30): user/auto pencil-mark differentiation is
+       global. USER pencils in printer's red (#B83A2B); AUTO pencils
+       in Classic warm grey #4A4A4F (AA-clear on every cell tint). */
+    --pencil-mark-color: #B83A2B;
+    --pencil-mark-auto-color: #4A4A4F;
+
+    /* Round-6: --error-text-color AND --error-fill-color unified to
+       printer's red across all themes. */
+    --error-fill-color: rgba(184, 58, 43, 0.20);
+    --error-text-color: #B83A2B;
+
+    --selection-outline-color: #007AFF;
+    --selected-fill-color: #5AB1FF80;
+    --matched-fill-color: #FFD60A33;
+    --peer-fill-color: #E0EAF6;
+    --selected-matched-fill-color: #5AB1FF99;
+
+    /* A23 — Cell-background palette. AA contrast verified per cell. */
+    --cell-bg-1-fill-color: transparent;
+    --cell-bg-2-fill-color: #FFE5E2;
+    --cell-bg-3-fill-color: #FFEED1;
+    --cell-bg-4-fill-color: #FFF7CF;
+    --cell-bg-5-fill-color: #DCF6E4;
+    --cell-bg-6-fill-color: #E4E4FF;
+    --cell-bg-7-fill-color: #D5F0FA;
+    --cell-bg-8-fill-color: #FFE2EC;
+    --cell-bg-9-fill-color: #EDEDEF;
+
+    --solved-digit-color: #007AFF;
+    --solved-given-digit-color: #000000;
+    --solved-fill-color: #34C75922;
+    --error-selected-fill-color: rgba(184, 58, 43, 0.33);
+
+    --hint-hot-spot-bg-color: #F2F2F7;
+    --hint-hot-spot-hover-bg-color: #2563EB26;
+    --hint-hot-spot-highlight-color: #FF3B30;
+    --hint-footer-bg-color: #FAFAFA;
+    --hint-target-fill-color: #34C75922;
+    --hint-highlight-fill-color: #FFCC0033;
+    --hint-new-digit-fill-color: #FFFFFF;
+    --hint-new-digit-bg-color: #34C759;
+    --hint-eliminations-fill-color: #FF3B3022;
+    --hint-elimination-bg-color: #FF3B30;
+    --hint-elimination-fill-color: #FFFFFF;
+
+    --difficulty-indicator-bg-color: transparent;
+    --difficulty-indicator-border-color: #E5E5EA;
+    --difficulty-indicator-text-color: #8E8E93;
+    --difficulty-indicator-label-color: #8E8E93;
+
+    --button-bg-color: #2563EB;
+    --button-text-color: #FFFFFF;
+
+    --grid-line-width: 0.5;
+    --grid-line-width-bold: 2;
+    --hint-hot-spot-highlight-line-width: 4;
+
+    /* Virtual keyboard — Classic baseline. */
+    --vkbd-active-button-bg-color: #2563EB;
+    --vkbd-active-button-icon-color: #FFFFFF;
+    --vkbd-bg-fill-color: transparent;
+    --vkbd-button-fill-color: #FFFFFF;
+    --vkbd-button-border-color: #DCE0E6;
+    --vkbd-button-text-color: #000000;
+    --vkbd-completed-button-text-color: #34C759;
+    --vkbd-mode-panel-fill-color: #FFFFFF;
+    --vkbd-mode-text-color: #8E8E93;
+    --vkbd-mode-icon-fill-color: #1C1C1E;
+    --vkbd-active-mode-icon-fill-color: #FFFFFF;
+    --spinner-color: #C7C7CC;
+
+    /* A17 — spacing scale. */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    /* QA-3 (#36): radius bucketing rule. */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+
+    /* A2 — type scale. */
+    --fs-xs: 12px;
+    --fs-sm: 14px;
+    --fs-md: 16px;
+    --fs-lg: 19px;
+    --fs-xl: 24px;
+    --fs-display: 28px;
+
+    /* QA-3 (#25): brand accent — indigo Classic. */
+    --accent: #2563EB;
+    --accent-2: #1D4ED8;
+    --focus-ring-color: #FF9500;
+
+    /* Phase 1a — orphan tokens promoted. */
+    --paper:  #FFFFFF;
+    --ink:    #0B1020;
+    --ink-2:  #3C4254;
+    --warn:   #FF9500;
+    --err:    #FF3B30;
+    --ed-ink: #1A1815;
+
+    /* Phase 5 — D-item cleanup tokens. */
+    --on-accent-text-color:        #FFFFFF;
+    --button-disabled-text-color:  #99999988;
+    --strikethrough-muted-color:   #999999;
+    --comparison-muted-text-color: #7A8194;
+    --hint-warn-text-color:        #B35200;
+    --hint-warn-bg-color:          #FFF4E0;
+    --hint-exhausted-text-color:   #B22222;
+    --hint-exhausted-bg-color:     #FFE4E0;
+    --streak-chip-text-color:      #B45309;
+    --streak-chip-bg-color:        rgba(255, 89, 0, 0.12);
+    --sparkline-bar-color:         #D8DCE5;
+    --saved-puzzle-divider-color:  #D8DCE5;
+    --vkbd-aux-button-fill-color:  #FAFAFA;
+    --vkbd-aux-button-border-color:#E2E6ED;
+    --vkbd-swatch-border-color:    #E5E8EF;
+
+    /* Difficulty ladder. */
+    --level-1: #34C759;
+    --level-2: #B58A00;
+    --level-3: #FF9500;
+    --level-4: #FF3B30;
+    --level-5: #AF52DE;
+    --level-6: #1C1C1E;
+    --level-1-soft: #34C75933;
+    --level-2-soft: #FFCC0033;
+    --level-3-soft: #FF950033;
+    --level-4-soft: #FF3B3033;
+    --level-5-soft: #AF52DE33;
+    --level-6-soft: #1C1C1E33;
+
+    /* Shadow tiers. */
+    --shadow-sm: 0 1px 2px rgba(15, 20, 40, 0.04), 0 1px 3px rgba(15, 20, 40, 0.06);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 24px 48px rgba(15, 20, 40, 0.16), 0 1px 0 rgba(15, 20, 40, 0.04);
+    --shadow-focus: 0 0 0 4px rgba(0, 122, 255, 0.18);
+
+    /* Motion vocabulary. */
+    --motion-fast:     120ms;
+    --motion-base:     180ms;
+    --motion-slow:     280ms;
+    --motion-touch:     80ms;
+    --motion-backdrop: 160ms;
+    --ease-standard:    cubic-bezier(0.2, 0, 0, 1);
+    --ease-emphasized:  cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+
+/* ============================================================
+   Modern theme — token overrides.
+   Activated via the `data-theme="modern"` attribute on the document
+   root. Design intent: calm, cozy, modern, inviting — deliberately
+   not iOS. Warm-paper page surface, slate accent in place of indigo,
+   slightly softened radii and warm-tinted shadows.
+   ============================================================ */
+:root[data-theme="modern"] {
+    --app-font-family: var(--font-manrope), var(--font-inter), system-ui, -apple-system,
+                       BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    /* Surfaces — warm cream page. */
+    --background-color: #F7F5F0;
+    --grid-bg-color: #F7F5F0;
+    --text-color: #1F2228;
+
+    --link-text-color: #4F6D8A;
+    --link-bg-color: transparent;
+    --link-hover-text-color: #3F5870;
+    --link-hover-bg-color: rgba(79, 109, 138, 0.10);
+
+    --status-bar-text-color: #8A8F9A;
+    --status-bar-bg: #FFFFFF;
+    --status-bar-border-color: #EAE6DD;
+    --status-bar-button-hover-color: #EFECE5;
+
+    --menu-border-color: #DDD7CB;
+    --menu-text-color: #1F2228;
+    --menu-bg-color: #FFFFFF;
+    --menu-box-shadow: 0 4px 12px rgba(45, 35, 20, 0.06), 0 2px 4px rgba(45, 35, 20, 0.04);
+    --menu-hover-text-color: #4F6D8A;
+    --menu-hover-bg-color: #EFECE5;
+    --menu-disabled-text-color: #B8AF9F;
+
+    --modal-text-color: #1F2228;
+    --modal-bg-color: #FFFFFF;
+    --modal-box-shadow: 0 16px 32px rgba(45, 35, 20, 0.12), 0 4px 12px rgba(45, 35, 20, 0.06);
+    --modal-backdrop-color: rgba(31, 34, 40, 0.40);
+    --modal-heading-underline-color: #EAE6DD;
+    --modal-button-text-color: #4F6D8A;
+    --modal-button-bg-color: #EFECE5;
+    --modal-button-primary-text-color: #FFFFFF;
+    --modal-button-primary-bg-color: #4F6D8A;
+    --modal-button-danger-text-color: #FFFFFF;
+    --modal-button-danger-bg-color: #B14A40;
+    --modal-icon-ok-fill-color: #367856;
+    --modal-icon-warning-fill-color: #DCA64A;
+    --modal-icon-error-fill-color: #B14A40;
+
+    --button-hover-shadow: 0 1px 2px rgba(45, 35, 20, 0.04), 0 1px 3px rgba(45, 35, 20, 0.06);
+
+    --input-toggle-bg-color: #DDD7CB;
+    --input-toggle-inset-color: transparent;
+    --input-toggle-off-color: #FFFFFF;
+    --input-toggle-on-color: #4F6D8A;
+    --input-multi-text-color: #8A8F9A;
+    --input-multi-bg-color: transparent;
+    --input-multi-selected-text-color: #FFFFFF;
+    --input-multi-selected-bg-color: #4F6D8A;
+
+    --badge-text-color: #FFFFFF;
+    --badge-bg-color: #B14A40;
+    --solved-text-color: #367856;
+
+    /* Round-12 (2026-05-01) — unified dark-gray grid borders. */
+    --grid-line-color: #888888;
+    --grid-line-color-bold: #2D2D2D;
+    --mini-grid-line-color: #B8AF9F;
+    --mini-grid-bar-color: #DCA64A;
+    --mini-grid-bar-text-color: #1F2228;
+
+    --given-digit-color: #1F2228;
+    --visited-digit-color: #B8AF9F;
+    --paused-digit-color: rgba(31, 34, 40, 0.16);
+    --digit-color: #4F6D8A;
+    --pencil-mark-color: #B83A2B;
+    --pencil-mark-auto-color: #6F7686;
+
+    --error-fill-color: rgba(184, 58, 43, 0.20);
+    --error-text-color: #B83A2B;
+
+    --selection-outline-color: #4F6D8A;
+    --selected-fill-color: rgba(79, 109, 138, 0.30);
+    --matched-fill-color: rgba(220, 166, 74, 0.18);
+    --peer-fill-color: rgba(79, 109, 138, 0.08);
+    --selected-matched-fill-color: rgba(79, 109, 138, 0.45);
+
+    --cell-bg-1-fill-color: transparent;
+    --cell-bg-2-fill-color: #F8DDD8;
+    --cell-bg-3-fill-color: #F8E8CB;
+    --cell-bg-4-fill-color: #F4F0CC;
+    --cell-bg-5-fill-color: #D8EDD8;
+    --cell-bg-6-fill-color: #DEDEED;
+    --cell-bg-7-fill-color: #D2E5EC;
+    --cell-bg-8-fill-color: #F2DAE2;
+    --cell-bg-9-fill-color: #E8E5DD;
+
+    --solved-digit-color: #4F6D8A;
+    --solved-given-digit-color: #1F2228;
+    --solved-fill-color: rgba(54, 120, 86, 0.16);
+    --error-selected-fill-color: rgba(184, 58, 43, 0.40);
+
+    --hint-hot-spot-bg-color: #EFECE5;
+    --hint-hot-spot-hover-bg-color: rgba(79, 109, 138, 0.18);
+    --hint-hot-spot-highlight-color: #B14A40;
+    --hint-footer-bg-color: #FAF7F2;
+    --hint-target-fill-color: rgba(54, 120, 86, 0.16);
+    --hint-highlight-fill-color: rgba(220, 166, 74, 0.22);
+    --hint-new-digit-fill-color: #FFFFFF;
+    --hint-new-digit-bg-color: #367856;
+    --hint-eliminations-fill-color: rgba(177, 74, 64, 0.16);
+    --hint-elimination-bg-color: #B14A40;
+    --hint-elimination-fill-color: #FFFFFF;
+
+    --difficulty-indicator-bg-color: transparent;
+    --difficulty-indicator-border-color: #DDD7CB;
+    --difficulty-indicator-text-color: #8A8F9A;
+    --difficulty-indicator-label-color: #8A8F9A;
+
+    --button-bg-color: #4F6D8A;
+    --button-text-color: #FFFFFF;
+
+    --vkbd-active-button-bg-color: #4F6D8A;
+    --vkbd-active-button-icon-color: #FFFFFF;
+    --vkbd-bg-fill-color: transparent;
+    --vkbd-button-fill-color: #FFFFFF;
+    --vkbd-button-border-color: #DDD7CB;
+    --vkbd-button-text-color: #1F2228;
+    --vkbd-completed-button-text-color: #367856;
+    --vkbd-mode-panel-fill-color: #FFFFFF;
+    --vkbd-mode-text-color: #8A8F9A;
+    --vkbd-mode-icon-fill-color: #1F2228;
+    --vkbd-active-mode-icon-fill-color: #FFFFFF;
+    --spinner-color: #B8AF9F;
+
+    /* Radii — softened. */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+
+    /* Brand accent — calm modern slate. */
+    --accent: #4F6D8A;
+    --accent-2: #3F5870;
+    --focus-ring-color: #B07418;
+
+    /* Difficulty ladder — Modern palette. */
+    --level-1: #367856;
+    --level-2: #C9A24C;
+    --level-3: #DCA64A;
+    --level-4: #B14A40;
+    --level-5: #8A6BB1;
+    --level-6: #2D2820;
+    --level-2-text: #1F2228;
+    --level-3-text: #1F2228;
+    --level-1-soft: rgba(54, 120, 86, 0.20);
+    --level-2-soft: rgba(201, 162, 76, 0.22);
+    --level-3-soft: rgba(220, 166, 74, 0.22);
+    --level-4-soft: rgba(177, 74, 64, 0.22);
+    --level-5-soft: rgba(138, 107, 177, 0.22);
+    --level-6-soft: rgba(45, 40, 32, 0.22);
+
+    /* Shadow tiers — warm-tinted. */
+    --shadow-sm: 0 1px 2px rgba(45, 35, 20, 0.04), 0 1px 3px rgba(45, 35, 20, 0.06);
+    --shadow-md: 0 4px 12px rgba(45, 35, 20, 0.06), 0 2px 4px rgba(45, 35, 20, 0.04);
+    --shadow-lg: 0 16px 32px rgba(45, 35, 20, 0.12), 0 4px 12px rgba(45, 35, 20, 0.06);
+    --shadow-focus: 0 0 0 4px rgba(176, 116, 24, 0.25);
+
+    /* Motion — Modern reads cozy. */
+    --motion-fast:     120ms;
+    --motion-base:     220ms;
+    --motion-slow:     320ms;
+    --motion-touch:     80ms;
+    --motion-backdrop: 200ms;
+}
+
+
+/* ============================================================
+   Editorial theme — token overrides.
+   Activated via the `data-theme="editorial"` attribute. Personality:
+   warm ink-on-vellum architecture. Warm vellum paper, hairline ink
+   rules, sharp corners, printer's red for entered digits and errata,
+   sepia for auto-filled candidates so the player's own pencil work
+   reads as a different colour of ink (not a fade).
+   ============================================================ */
+:root[data-theme="editorial"] {
+    --app-font-family: var(--font-manrope), var(--font-inter), system-ui, -apple-system,
+                       BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    /* Surfaces — warm vellum page, white paper for cells/cards. */
+    --background-color: #F5F2EC;
+    --grid-bg-color: #FFFEF9;
+    --text-color: #1A1815;
+
+    --link-text-color: #B83A2B;
+    --link-bg-color: transparent;
+    --link-hover-text-color: #8C2C20;
+    --link-hover-bg-color: rgba(184, 58, 43, 0.08);
+
+    --status-bar-text-color: #57534B;
+    --status-bar-bg: #FFFEF9;
+    --status-bar-border-color: #1A1815;
+    --status-bar-button-hover-color: #F0EBDF;
+
+    --menu-border-color: #1A1815;
+    --menu-text-color: #1A1815;
+    --menu-bg-color: #FFFEF9;
+    --menu-box-shadow: 0 12px 30px rgba(26, 24, 21, 0.10);
+    --menu-hover-text-color: #B83A2B;
+    --menu-hover-bg-color: #F0EBDF;
+    --menu-disabled-text-color: #8F8B81;
+
+    --modal-text-color: #1A1815;
+    --modal-bg-color: #FFFEF9;
+    --modal-box-shadow: 0 16px 40px rgba(26, 24, 21, 0.12), 0 1px 0 rgba(26, 24, 21, 0.04);
+    --modal-backdrop-color: rgba(26, 24, 21, 0.30);
+    --modal-heading-underline-color: #1A1815;
+    --modal-button-text-color: #1A1815;
+    --modal-button-bg-color: #F0EBDF;
+    --modal-button-primary-text-color: #FFFEF9;
+    --modal-button-primary-bg-color: #1A1815;
+    --modal-button-danger-text-color: #FFFEF9;
+    --modal-button-danger-bg-color: #B83A2B;
+    --modal-icon-ok-fill-color: #4F7A38;
+    --modal-icon-warning-fill-color: #C9A24C;
+    --modal-icon-error-fill-color: #B83A2B;
+
+    --button-hover-shadow: 0 1px 2px rgba(26, 24, 21, 0.06), 0 1px 3px rgba(26, 24, 21, 0.10);
+
+    --input-toggle-bg-color: #E8DFCC;
+    --input-toggle-inset-color: transparent;
+    --input-toggle-off-color: #FFFEF9;
+    --input-toggle-on-color: #1A1815;
+    --input-multi-text-color: #57534B;
+    --input-multi-bg-color: transparent;
+    --input-multi-selected-text-color: #FFFEF9;
+    --input-multi-selected-bg-color: #1A1815;
+
+    --badge-text-color: #FFFEF9;
+    --badge-bg-color: #B83A2B;
+    --solved-text-color: #4F7A38;
+
+    /* Round-12 (2026-05-01) — unified dark-gray grid borders. */
+    --grid-line-color: #888888;
+    --grid-line-color-bold: #2D2D2D;
+    --mini-grid-line-color: rgba(26, 24, 21, 0.22);
+    --mini-grid-bar-color: #C9A24C;
+    --mini-grid-bar-text-color: #1A1815;
+
+    --given-digit-color: #1A1815;
+    --visited-digit-color: #8F8B81;
+    --paused-digit-color: rgba(26, 24, 21, 0.16);
+    --digit-color: #243752;
+    --pencil-mark-color: #B83A2B;
+    --pencil-mark-auto-color: #6B5A3E;
+
+    --error-fill-color: rgba(184, 58, 43, 0.20);
+    --error-text-color: #B83A2B;
+
+    --selection-outline-color: #1A1815;
+    --selected-fill-color: rgba(214, 169, 113, 0.32);
+    --matched-fill-color: rgba(214, 169, 113, 0.18);
+    --peer-fill-color: rgba(26, 24, 21, 0.05);
+    --selected-matched-fill-color: rgba(214, 169, 113, 0.45);
+
+    --cell-bg-1-fill-color: transparent;
+    --cell-bg-2-fill-color: #FBE4DD;
+    --cell-bg-3-fill-color: #F9E5C9;
+    --cell-bg-4-fill-color: #F4ECC9;
+    --cell-bg-5-fill-color: #DCEAD2;
+    --cell-bg-6-fill-color: #DCDDED;
+    --cell-bg-7-fill-color: #D2DEE6;
+    --cell-bg-8-fill-color: #F2DAE2;
+    --cell-bg-9-fill-color: #E8E2D5;
+
+    --solved-digit-color: #243752;
+    --solved-given-digit-color: #1A1815;
+    --solved-fill-color: rgba(79, 122, 56, 0.14);
+    --error-selected-fill-color: rgba(184, 58, 43, 0.36);
+
+    --hint-hot-spot-bg-color: #F0EBDF;
+    --hint-hot-spot-hover-bg-color: rgba(184, 58, 43, 0.12);
+    --hint-hot-spot-highlight-color: #B83A2B;
+    --hint-footer-bg-color: #F0EBDF;
+    --hint-target-fill-color: rgba(79, 122, 56, 0.16);
+    --hint-highlight-fill-color: rgba(214, 169, 113, 0.30);
+    --hint-new-digit-fill-color: #FFFEF9;
+    --hint-new-digit-bg-color: #4F7A38;
+    --hint-eliminations-fill-color: rgba(184, 58, 43, 0.16);
+    --hint-elimination-bg-color: #B83A2B;
+    --hint-elimination-fill-color: #FFFEF9;
+
+    --difficulty-indicator-bg-color: transparent;
+    --difficulty-indicator-border-color: #1A1815;
+    --difficulty-indicator-text-color: #57534B;
+    --difficulty-indicator-label-color: #8F8B81;
+
+    --button-bg-color: #1A1815;
+    --button-text-color: #FFFEF9;
+
+    --vkbd-active-button-bg-color: #1A1815;
+    --vkbd-active-button-icon-color: #FFFEF9;
+    --vkbd-bg-fill-color: transparent;
+    --vkbd-button-fill-color: #FFFEF9;
+    --vkbd-button-border-color: #1A1815;
+    --vkbd-button-text-color: #1A1815;
+    --vkbd-completed-button-text-color: #4F7A38;
+    --vkbd-mode-panel-fill-color: #FFFEF9;
+    --vkbd-mode-text-color: #57534B;
+    --vkbd-mode-icon-fill-color: #1A1815;
+    --vkbd-active-mode-icon-fill-color: #FFFEF9;
+    --spinner-color: #8F8B81;
+
+    /* Radii — sharp. Editorial reads as printed type. */
+    --radius-sm: 0px;
+    --radius-md: 2px;
+    --radius-lg: 0px;
+
+    /* Brand accent — printer's red. */
+    --accent: #B83A2B;
+    --accent-2: #8C2C20;
+    --focus-ring-color: #B83A2B;
+
+    /* Difficulty ladder — warm paper palette. */
+    --level-1: #4F7A38;
+    --level-2: #C9A24C;
+    --level-3: #B8693A;
+    --level-4: #B83A2B;
+    --level-5: #6B4F8C;
+    --level-6: #1A1815;
+    --level-2-text: #1A1815;
+    --level-3-text: #FFFEF9;
+    --level-1-soft: rgba(79, 122, 56, 0.20);
+    --level-2-soft: rgba(201, 162, 76, 0.22);
+    --level-3-soft: rgba(184, 105, 58, 0.22);
+    --level-4-soft: rgba(184, 58, 43, 0.22);
+    --level-5-soft: rgba(107, 79, 140, 0.22);
+    --level-6-soft: rgba(26, 24, 21, 0.20);
+
+    /* Shadow tiers — warm-tinted, sparing. */
+    --shadow-sm: 0 1px 2px rgba(26, 24, 21, 0.06);
+    --shadow-md: 0 4px 12px rgba(26, 24, 21, 0.08);
+    --shadow-lg: 0 16px 40px rgba(26, 24, 21, 0.12);
+    --shadow-focus: 0 0 0 3px rgba(184, 58, 43, 0.20);
+
+    /* Motion — paper turns slowly. */
+    --motion-fast:     120ms;
+    --motion-base:     240ms;
+    --motion-slow:     320ms;
+    --motion-touch:     80ms;
+    --motion-backdrop: 200ms;
+}
+
+
+/* ============================================================
+   Base document styles. Phase 2 ships a static placeholder page;
+   the CRA spec's overflow:hidden / touch-action:none / 100%
+   width+height rules that lock the play surface to the viewport
+   land in Phase 5 alongside the grid component.
+   ============================================================ */
+
+html {
+    margin: 0;
+    padding: 0;
+}
+
 body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    background-color: #f7f5f0;
-    color: #1a1815;
-    font-family:
-        'Manrope', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: var(--app-font-family);
+    font-size: var(--fs-md);
+    /* Round-10: tnum keeps the timer + aligned counters from dancing. */
+    font-feature-settings: 'tnum' 1;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
 }
+
+a {
+    color: var(--link-text-color);
+    background-color: var(--link-bg-color);
+    text-decoration: none;
+    padding: 0 0.1em;
+}
+
+a:hover {
+    color: var(--link-hover-text-color);
+    background-color: var(--link-hover-bg-color);
+    border-bottom: 1px solid var(--link-hover-text-color);
+}
+
+/* Round-12 (2026-05-01) — owner directive: no focus ring project-wide.
+   The --focus-ring-color tokens remain in the theme blocks as inert
+   declarations (kept so any third-party CSS that references them
+   still resolves). To restore for keyboard a11y, replace this rule
+   with the prior A1 outline rules. */
+:focus,
+:focus-visible {
+    outline: none !important;
+}
+
+/* A6 — visually-hidden utility for live-region nodes that should be
+   announced by screen readers without taking visible space. */
+.visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+
+/* ============================================================
+   Phase 2 placeholder layout. Removed in Phase 5/6 when the home
+   page becomes the actual play surface (welcome / resume modal +
+   grid + numpad). Token-driven so all three themes render correctly.
+   ============================================================ */
 
 .placeholder {
     min-height: 100vh;
@@ -34,20 +699,33 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 2rem;
+    gap: var(--space-2);
+    padding: var(--space-5);
     text-align: center;
 }
 
 .placeholder-title {
-    font-size: clamp(2rem, 4vw + 1rem, 3.5rem);
+    font-size: var(--fs-display);
     font-weight: 700;
     letter-spacing: -0.02em;
     margin: 0;
+    color: var(--text-color);
 }
 
 .placeholder-subtitle {
-    font-size: 1rem;
-    color: #57534b;
+    font-size: var(--fs-md);
+    color: var(--ink-2);
     margin: 0;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }

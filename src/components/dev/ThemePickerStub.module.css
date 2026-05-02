@@ -1,0 +1,66 @@
+/*
+ * Theme picker stub — fixed top-right corner, three buttons.
+ * Token-driven so the picker visibly re-skins under whichever theme
+ * is active (the picker IS one of the verifications).
+ */
+
+.picker {
+    position: fixed;
+    top: var(--space-3);
+    right: var(--space-3);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    background-color: var(--menu-bg-color);
+    color: var(--menu-text-color);
+    border: 1px solid var(--menu-border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--menu-box-shadow);
+    font-family: var(--app-font-family);
+    font-size: var(--fs-xs);
+    font-feature-settings: 'tnum' 1;
+}
+
+.button {
+    background-color: transparent;
+    color: var(--menu-text-color);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-2);
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+        background-color var(--motion-fast) var(--ease-standard),
+        color var(--motion-fast) var(--ease-standard);
+}
+
+.button:hover {
+    background-color: var(--menu-hover-bg-color);
+    color: var(--menu-hover-text-color);
+}
+
+.button[data-active='true'] {
+    background-color: var(--accent);
+    color: var(--on-accent-text-color);
+    border-color: var(--accent);
+}
+
+.button[data-active='true']:hover {
+    background-color: var(--accent-2);
+    border-color: var(--accent-2);
+    color: var(--on-accent-text-color);
+}
+
+.label {
+    margin-left: var(--space-1);
+    padding-left: var(--space-2);
+    border-left: 1px solid var(--menu-border-color);
+    color: var(--menu-disabled-text-color);
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
