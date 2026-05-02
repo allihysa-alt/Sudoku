@@ -2,6 +2,8 @@
 
 A modern Sudoku web app on Next.js 15 + TypeScript.
 
+**Live**: https://sudoku--sam-sudoku.us-east4.hosted.app
+
 This is a standalone build — it does not share storage, URLs, users, or
 migrations with any other Sudoku project. The architecture cheat-sheet
 in `docs/ARCHITECTURE.md` describes the three orthogonal axes (theme,
