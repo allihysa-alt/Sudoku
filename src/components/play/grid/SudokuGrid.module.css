@@ -1,0 +1,188 @@
+/*
+ * SudokuGrid.module.css
+ * --------------------------------------------------------------------
+ * Phase 5 — translated from CRA src/components/sudoku-grid/sudoku-grid.css.
+ * Kebab-case class names converted to camelCase (CSS-Modules-friendly);
+ * token references unchanged. All sub-components in this directory
+ * import styles from THIS file so the descendant selectors below stay
+ * consistent across files.
+ *
+ * Deliberately omitted (later phases):
+ *   - .sudokuGrid.hint .* rules        — Phase 9 (hint pedagogy)
+ *   - .solved / .animate / @keyframes rainbow — Phase 7 (victory)
+ *   - .mini and saved-puzzle rules      — Phase 10
+ */
+
+.sudokuGrid {
+    text-align: center;
+}
+
+.sudokuGrid .line {
+    stroke: var(--grid-line-color);
+    stroke-width: var(--grid-line-width);
+}
+
+.sudokuGrid .lineBold {
+    stroke: var(--grid-line-color-bold);
+    stroke-width: var(--grid-line-width-bold);
+    stroke-linejoin: round;
+}
+
+/* QA-3 (#17): outer frame slightly stronger than the inner 3x3
+   separators so the grid reads as a contained block at a glance. */
+.sudokuGrid .lineOuter {
+    stroke: var(--grid-line-color-bold);
+    stroke-width: calc(var(--grid-line-width-bold) * 1.4);
+    stroke-linejoin: round;
+}
+
+.gridBg { fill: var(--grid-bg-color); }
+
+/* Round-7 editorial: drop the cream grid-bg fill so the grid sits flush
+   on the page beige instead of presenting as an inset card. */
+:root[data-theme="editorial"] .sudokuGrid .gridBg {
+    fill: transparent;
+}
+
+.selectionOutline {
+    fill: none;
+    stroke: var(--selection-outline-color);
+    /* Look-and-feel: thin 1.5px-equivalent accent outline. SVG units
+       are relative to the 100-unit cell, so 3 maps to ~1.5 screen
+       pixels at typical render size. */
+    stroke-width: 3;
+}
+
+.cellSelectMatchOverlay {
+    fill: transparent;
+}
+
+.cellBg .colorCode1 { fill: var(--cell-bg-1-fill-color); }
+.cellBg .colorCode2 { fill: var(--cell-bg-2-fill-color); }
+.cellBg .colorCode3 { fill: var(--cell-bg-3-fill-color); }
+.cellBg .colorCode4 { fill: var(--cell-bg-4-fill-color); }
+.cellBg .colorCode5 { fill: var(--cell-bg-5-fill-color); }
+.cellBg .colorCode6 { fill: var(--cell-bg-6-fill-color); }
+.cellBg .colorCode7 { fill: var(--cell-bg-7-fill-color); }
+.cellBg .colorCode8 { fill: var(--cell-bg-8-fill-color); }
+.cellBg .colorCode9 { fill: var(--cell-bg-9-fill-color); }
+
+.peer .cellSelectMatchOverlay {
+    fill: var(--peer-fill-color);
+}
+
+.selected .cellSelectMatchOverlay {
+    fill: var(--selected-fill-color);
+}
+
+.matched .cellSelectMatchOverlay {
+    /* Cell holds the focus digit. Painted with --selected-fill-color
+       (the same blue the selected cell uses) per the highlight spec. */
+    fill: var(--selected-fill-color);
+}
+
+.matchedPencil .cellSelectMatchOverlay {
+    /* Empty cell whose pencil marks include the focus digit. */
+    fill: var(--matched-fill-color);
+}
+
+.selected.matched .cellSelectMatchOverlay {
+    fill: var(--selected-fill-color);
+}
+
+.error.selected .cellSelectMatchOverlay {
+    fill: var(--error-selected-fill-color);
+}
+
+.error .cellSelectMatchOverlay {
+    fill: var(--error-fill-color);
+}
+
+text.digit {
+    fill: var(--digit-color);
+    font-family: var(--app-font-family);
+    font-weight: 600;
+    /* A19 — keep the existing font-feature-settings (broadest support
+       on SVG) and add the modern shorthand for tabular numerals. */
+    font-feature-settings: "tnum" 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+text.digit.error {
+    fill: var(--error-text-color);
+}
+
+/* QA-3 (#11): every instance of a completed digit (one whose 9
+   placements are all on the grid) renders in green. Mirrors the
+   keypad chip turning green when the player finishes that digit. */
+text.digit.completed {
+    fill: var(--vkbd-completed-button-text-color);
+}
+text.digit.completed.given {
+    fill: var(--vkbd-completed-button-text-color);
+}
+
+text.digit.given {
+    fill: var(--given-digit-color);
+    /* A19 — given (clue) digits get a heavier weight. */
+    font-weight: 700;
+}
+
+/* A11 — gentle entry pop on freshly-placed digits. transform-box:
+   fill-box keeps the scale anchored to the digit itself, not the
+   SVG origin. */
+.sudokuCellDigitAnim {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    animation: sudokuCellDigitPop 120ms ease-out both;
+}
+@keyframes sudokuCellDigitPop {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sudokuCellDigitAnim {
+        animation: none;
+    }
+}
+
+/* Editorial — Section 04 (Cell states) colour distinction.
+   Match-digit cells flip to printer's red so the eye finds the focused
+   digit at a glance. */
+:root[data-theme="editorial"] .sudokuGrid .matched text.digit {
+    fill: var(--accent);
+}
+
+text.innerPencil,
+.outerPencil text {
+    fill: var(--pencil-mark-color);
+    font-family: var(--app-font-family);
+    font-weight: 500;
+    font-feature-settings: "tnum" 1;
+}
+
+/* G-03 — bold-inner is applied size-based by SudokuCellPencilMarks.tsx
+   (shouldBoldInner), so any cell with 1 or 2 visible inner pencil
+   marks renders bold regardless of mode. */
+text.innerPencil.boldInner,
+.outerPencil.boldInner text {
+    font-weight: bold;
+}
+
+/* Per-source pencil-mark colour — global across all themes.
+   markUser → printer's red (the manual ink); markAuto → theme's
+   secondary pencil colour. */
+text.innerPencil tspan.markAuto,
+.outerPencil text.markAuto {
+    fill: var(--pencil-mark-auto-color);
+}
+
+/* Editorial — outer-pencil (3x3 corner-mark mini-grid) renders in
+   IBM Plex Mono so the columns align. Inner-pencil stays in the
+   universal Manrope face. */
+:root[data-theme="editorial"] .outerPencil text {
+    font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+    font-variant-numeric: lining-nums tabular-nums;
+    font-weight: 500;
+}

@@ -1,15 +1,18 @@
-import { StoreSync } from '@/components/dev/StoreSync';
+import PlayClient from '@/components/play/PlayClient';
 import { ThemePickerStub } from '@/components/dev/ThemePickerStub';
 
+// Server shell. The server's job is the HTML scaffold + anti-FOUC
+// (handled in layout.tsx) + OG metadata. The play surface is a single
+// client island — see src/components/play/PlayClient.tsx.
+//
+// ThemePickerStub stays as a dev affordance until Phase 8 ships the
+// real Settings modal; remove or move under /dev once the picker is
+// wired into ModalSettings.
 export default function HomePage() {
   return (
     <>
-      <StoreSync />
       <ThemePickerStub />
-      <main className="placeholder">
-        <h1 className="placeholder-title">Sudoku</h1>
-        <p className="placeholder-subtitle">Coming soon.</p>
-      </main>
+      <PlayClient />
     </>
   );
 }

@@ -33,6 +33,13 @@ import {
     MODAL_TYPE_CONFIRM_RESET_STATS,
 } from './modal-types';
 
+// PHASE-5 BRIDGE — loadSettings / saveSettings (below) round-trip
+// through useSettingsStore (camelCase keys) instead of the legacy CRA
+// 'settings' localStorage key (kebab-case keys). The bare 'settings'
+// key is never read or written after Phase 5. Saved-puzzle migrations
+// remain in scope for Phase 10.
+import { useSettingsStore } from '@/state/settingsStore';
+
 export const SETTINGS = {
     // Look-and-feel consolidation: the app now ships a single unified
     // theme. The legacy darkMode/theme keys (and the high-contrast and
@@ -375,78 +382,39 @@ export const modelHelpers = {
         [SETTINGS.compactSettingsLayoutTouched]: false,
     },
 
+    // PHASE-5 BRIDGE — body neutered. Reads from useSettingsStore
+    // (camelCase keys) and translates to the engine's kebab-case shape
+    // via the SETTINGS map. The legacy 'settings' localStorage key is
+    // never read; CRA-era one-shot migrations (dark-mode strip, "undefined"
+    // → hint-budget rename, standard/editorial → auto numpadLayout, the
+    // boot-time editorial→compactSettingsLayout=true rule) are obsolete
+    // for this build because the new store always boots from
+    // DEFAULT_SETTINGS and has never carried legacy keys. The store's
+    // own `merge` defensively layers defaults under persisted state, so
+    // returning users on a future schema bump get new keys with their
+    // defaults too.
     loadSettings: () => {
-        const defaults = modelHelpers.DEFAULT_SETTINGS;
-        let savedSettings = {};
-        try {
-            const savedSettingsJSON = window.localStorage.getItem('settings') || '{}';
-            savedSettings = JSON.parse(savedSettingsJSON);
-        }
-        catch {
-            // ignore errors
-        };
-        // Theme batch — the legacy `theme` strip is gone. SETTINGS.theme
-        // now persists ('classic' | 'modern'). The legacy `dark-mode`
-        // key is still stripped — it was a separate boolean from the
-        // dropped dark theme; not part of the current two-theme model.
-        let migrated = false;
-        if (savedSettings) {
-            delete savedSettings['dark-mode'];
-            // B7 migration — earlier builds wrote the hint-budget value
-            // under the literal key "undefined" because SETTINGS.hintBudget
-            // was missing from the SETTINGS export. Rename it on first
-            // load so the player keeps their chosen budget on the new
-            // canonical key.
-            if (Object.prototype.hasOwnProperty.call(savedSettings, 'undefined')) {
-                if (!Object.prototype.hasOwnProperty.call(savedSettings, SETTINGS.hintBudget)) {
-                    savedSettings[SETTINGS.hintBudget] = savedSettings['undefined'];
-                }
-                delete savedSettings['undefined'];
-                migrated = true;
-            }
-        }
-        const settings = {...defaults, ...savedSettings};
-        // Round-9 migration: the old layout values 'standard' (SVG
-        // keypad) and 'editorial' (stacked HTML keypad) both fold to
-        // 'auto'. The SVG keypad has been retired; the Editorial
-        // keypad now handles both stacked and calculator variants
-        // and 'auto' picks based on viewport orientation. The
-        // touched flag is preserved — if the user explicitly picked
-        // a layout before, treat that as them having opted into the
-        // responsive default. If they want to lock back to stacked
-        // they can do so from settings.
-        const persistedLayout = settings[SETTINGS.numpadLayout];
-        if (persistedLayout === 'standard' || persistedLayout === 'editorial') {
-            settings[SETTINGS.numpadLayout] = 'auto';
-            migrated = true;
-        }
-        // Phase 4 — compact-settings-layout boot rule. Same auto-track
-        // pattern as numpadLayout: Editorial → true, other themes →
-        // false, unless the user has explicitly picked (touched flag).
-        const compactMissing = !Object.prototype.hasOwnProperty.call(savedSettings, SETTINGS.compactSettingsLayout);
-        const compactTouched = !!settings[SETTINGS.compactSettingsLayoutTouched];
-        if (compactMissing && !compactTouched) {
-            settings[SETTINGS.compactSettingsLayout] = (settings[SETTINGS.theme] === 'editorial');
-        }
+        const camelState = useSettingsStore.getState();
+        const settings = {};
+        Object.keys(SETTINGS).forEach((camelKey) => {
+            settings[SETTINGS[camelKey]] = camelState[camelKey];
+        });
         modelHelpers.syncSettingsToDom(settings);
-        if (migrated) {
-            try {
-                window.localStorage.setItem('settings', JSON.stringify(savedSettings));
-            } catch { /* quota exceeded; tolerated */ }
-        }
         return settings;
     },
 
+    // PHASE-5 BRIDGE — body neutered. Mirrors the CRA spec's saveSettings
+    // mutation rules (autoSave-toggle wipes saved puzzles; numpadLayout
+    // change sets the touched flag; theme change auto-flips
+    // compactSettingsLayout when not touched), then translates the
+    // kebab-case shape back to camelCase and pushes through
+    // useSettingsStore.setState — Zustand persist middleware writes to
+    // 'sudoku:settings'. The legacy 'settings' key is never written.
     saveSettings: (grid, newSettings) => {
         const oldSettings = grid.get('settings');
         if (oldSettings[SETTINGS.autoSave] && !newSettings[SETTINGS.autoSave]) {
             modelHelpers.deleteSavedPuzzles();
         }
-        // Numpad-layout option (c): theme change auto-flips the layout
-        // when the user has never explicitly picked one; an explicit
-        // pick sets the touched flag so future theme switches keep the
-        // user's choice. Both the touched-write and the auto-flip
-        // mutate `newSettings` in-place before the persist below.
         const themeBefore = oldSettings[SETTINGS.theme];
         const themeAfter = newSettings[SETTINGS.theme];
         const layoutBefore = oldSettings[SETTINGS.numpadLayout];
@@ -459,14 +427,6 @@ export const modelHelpers = {
                 [SETTINGS.numpadLayoutTouched]: true,
             };
         }
-        // Round-9: theme-driven layout auto-flip dropped. With the
-        // Editorial keypad as the only renderer and 'auto' as the
-        // responsive default, theme changes no longer need to switch
-        // the layout — the keypad is the same component across all
-        // themes; only token values differ.
-        // Phase 4 — compact-settings-layout auto-track. Same pattern
-        // as numpadLayout: explicit pick sets the touched flag; theme
-        // changes auto-flip until the user has touched.
         const compactBefore = !!oldSettings[SETTINGS.compactSettingsLayout];
         const compactAfter = !!newSettings[SETTINGS.compactSettingsLayout];
         const compactChanged = compactBefore !== compactAfter;
@@ -483,8 +443,14 @@ export const modelHelpers = {
                 [SETTINGS.compactSettingsLayout]: (themeAfter === 'editorial'),
             };
         }
-        const newSettingsJSON = JSON.stringify(newSettings);
-        window.localStorage.setItem('settings', newSettingsJSON);
+        // Translate kebab→camel and push through the store. Persist
+        // middleware writes to 'sudoku:settings'; the bare 'settings'
+        // key is never touched.
+        const camelOut = {};
+        Object.keys(SETTINGS).forEach((camelKey) => {
+            camelOut[camelKey] = newSettings[SETTINGS[camelKey]];
+        });
+        useSettingsStore.setState(camelOut);
         modelHelpers.syncSettingsToDom(newSettings);
         return grid.set('settings', newSettings);
     },

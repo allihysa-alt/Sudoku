@@ -1,0 +1,33 @@
+/*
+ * PlayClient.module.css
+ * --------------------------------------------------------------------
+ * Phase 5 — minimal play-surface chrome. Center the board on the
+ * page; placeholder copy while the puzzle generates. Phase 6 grows
+ * this into a side-by-side / stacked layout with the numpad.
+ *
+ * Background and text colour cascade from <body> (which paints
+ * --background-color / --text-color from app/globals.css) — no
+ * per-component fills needed.
+ */
+
+.playSurface {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    padding: 24px;
+}
+
+.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    padding: 24px;
+}
+
+.placeholderText {
+    font-family: var(--app-font-family);
+    font-size: 16px;
+    opacity: 0.7;
+}
