@@ -49,7 +49,6 @@ function getWorker() {
         });
     } catch (err) {
         workerUnavailable = true;
-        // eslint-disable-next-line no-console
         console.warn('puzzle-cache worker unavailable, falling back to sync:',
             err && err.message);
         return null;
