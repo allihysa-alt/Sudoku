@@ -1,0 +1,21 @@
+# Firebase App Hosting backend configuration.
+# Docs: https://firebase.google.com/docs/app-hosting/configure
+#
+# Cost control: maxInstances=1 keeps Cloud Run scaling capped during
+# the pre-launch phase. Bump this once the app has a real traffic
+# baseline. minInstances=0 means cold starts on idle, but $0 idle
+# cost — the right trade-off until launch.
+
+runConfig:
+  cpu: 1
+  memoryMiB: 512
+  maxInstances: 1
+  minInstances: 0
+  concurrency: 80
+
+env:
+  - variable: NEXT_TELEMETRY_DISABLED
+    value: '1'
+    availability:
+      - BUILD
+      - RUNTIME

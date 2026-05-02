@@ -17,7 +17,7 @@ interactive surface coherent as features land.
 - **Styling**: `app/globals.css` with `:root[data-theme]` token blocks
   + CSS Modules per component
 - **Testing**: Vitest (unit + component) + Playwright (E2E)
-- **Hosting**: Vercel (preview deploys per PR; production on push to `main`)
+- **Hosting**: Firebase App Hosting (production deploys on push to `main`; project `sam-sudoku`)
 - **Package manager**: pnpm
 
 ## Quickstart

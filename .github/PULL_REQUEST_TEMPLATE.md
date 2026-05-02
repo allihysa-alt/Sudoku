@@ -25,4 +25,4 @@ from the CRA blueprint. None? Write "None." -->
 - [ ] `pnpm lint:css` clean
 - [ ] `pnpm test` green
 - [ ] `pnpm build` succeeds
-- [ ] Vercel preview deploy looks right
+- [ ] Firebase App Hosting rollout looks right (after merge to main)
